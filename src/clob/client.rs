@@ -832,14 +832,15 @@ impl Client<Unauthenticated> {
 
         let mut builder = ReqwestClient::builder().default_headers(headers);
 
-        // Use proxy with ASN targeting for Polymarket (bypasses URL parsing issues with semicolons)
-        if std::env::var("POLYMARKET_PROXY").is_ok() {
-            let proxy = reqwest::Proxy::all("http://gw.dataimpulse.com:10000")
-                .expect("Invalid proxy URL")
-                .basic_auth(
-                    "0dbd857506035f5083d7__cr.nl;state.northholland;city.amsterdamzuidoost;asn.60439",
-                    "912aa800878e195a"
-                );
+        // Use proxy if POLYMARKET_PROXY_HOST, POLYMARKET_PROXY_USER, POLYMARKET_PROXY_PASS are set
+        if let (Ok(host), Ok(user), Ok(pass)) = (
+            std::env::var("POLYMARKET_PROXY_HOST"),
+            std::env::var("POLYMARKET_PROXY_USER"),
+            std::env::var("POLYMARKET_PROXY_PASS"),
+        ) {
+            let proxy = reqwest::Proxy::all(&host)
+                .expect("Invalid POLYMARKET_PROXY_HOST")
+                .basic_auth(&user, &pass);
             builder = builder.proxy(proxy);
         }
 
