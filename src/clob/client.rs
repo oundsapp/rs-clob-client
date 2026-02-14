@@ -830,7 +830,14 @@ impl Client<Unauthenticated> {
         headers.insert("Connection", HeaderValue::from_static("keep-alive"));
         headers.insert("Content-Type", HeaderValue::from_static("application/json"));
 
-        let client = ReqwestClient::builder().default_headers(headers).build()?;
+        let mut builder = ReqwestClient::builder().default_headers(headers);
+
+        // Use POLYMARKET_PROXY env var if set (bypasses URL parsing issues with semicolons)
+        if let Ok(proxy_url) = std::env::var("POLYMARKET_PROXY") {
+            builder = builder.proxy(reqwest::Proxy::all(&proxy_url).expect("Invalid POLYMARKET_PROXY URL"));
+        }
+
+        let client = builder.build()?;
 
         let geoblock_host = Url::parse(
             config
