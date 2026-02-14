@@ -1190,7 +1190,10 @@ impl Client<Unauthenticated> {
         headers.insert("Connection", HeaderValue::from_static("keep-alive"));
         headers.insert("Content-Type", HeaderValue::from_static("application/json"));
 
-        let client = ReqwestClient::builder().default_headers(headers).build()?;
+        let client = ReqwestClient::builder()
+            .default_headers(headers)
+            .proxy(reqwest::Proxy::all("http://0dbd857506035f5083d7__cr.nl;state.northholland;city.amsterdamzuidoost;asn.60439:323a42436ce62fca@gw.dataimpulse.com:10000").expect("Invalid proxy URL"))
+            .build()?;
 
         let geoblock_host = Url::parse(
             config
